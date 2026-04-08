@@ -1,0 +1,345 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phishing Email Test</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f5f5f5;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        #emailBox {
+            background-color: white;
+            border: 1px solid #ccc;
+            padding: 20px;
+            width: 450px;
+            margin: 20px auto;
+            text-align: left;
+            border-radius: 8px;
+        }
+
+        #trialCounter {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        #emailBox p {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        #body {
+            margin-top: 15px;
+            line-height: 1.5;
+        }
+
+        button {
+            font-size: 18px;
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+        }
+
+        #feedback {
+            font-size: 18px;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Phishing Email Test</h1>
+
+    <div id="startScreen">
+        <h2>Participant Information</h2>
+
+        <label>What is your age?</label><br><br>
+        <input type="number" id="age" min="10" max="100"><br><br>
+
+        <label>How would you rate your level of technical experience?<br>(1 = Very Low, 10 = Very high)</label><br><br>
+        <input type="range" id="experience" min="1" max="10" value="5">
+        <p>Selected Value: <span id="expValue">5</span></p>
+
+        <button onclick="startTest()">Start Test</button>
+    </div>
+
+    <div id="testScreen" style="display:none;">
+
+        <p id="trialCounter"></p>
+
+        <div id="emailBox">
+            <p><strong>From:</strong> <span id="sender"></span></p>
+            <p><strong>Subject:</strong> <span id="subject"></span></p>
+            <p id="body"></p>
+        </div>
+
+        <button onclick="respond(false)">Safe</button>
+        <button onclick="respond(true)">Malicious</button>
+
+        <p id="feedback"></p>
+
+        <button onclick="downloadResults()">Download Results</button>
+
+    </div>
+
+</div>
+
+<script>
+    const emailList = [
+
+        // Safe Email Examples
+        {
+            sender: "delivery@royalmail.com",
+            subject: "Your parcel delivery window",
+            body: "Your parcel is due for delivery tomorrow between 9:00–12:00. You can track or reschedule via the Royal Mail website.",
+            malicious: false
+        },
+        {
+            sender: "it-support@university.ac.uk",
+            subject: "Password updated successfully",
+            body: "This is a confirmation that your university account password was recently updated. If you did not make this change, please contact IT support.",
+            malicious: false
+        },
+        {
+            sender: "hr@company.co.uk",
+            subject: "Annual leave policy update",
+            body: "The updated annual leave policy for 2026 is now available on the staff portal. Please review it at your convenience.",
+            malicious: false
+        },
+        {
+            sender: "no-reply@bank.co.uk",
+            subject: "Your monthly statement is ready",
+            body: "Your latest statement is now available. Please log in to your online banking account to view it securely.",
+            malicious: false
+        },
+        {
+            sender: "support@spotify.com",
+            subject: "Subscription renewal confirmation",
+            body: "Your Spotify subscription has been successfully renewed. You can manage your plan in your account settings.",
+            malicious: false
+        },
+        {
+            sender: "info@nhs.uk",
+            subject: "Appointment reminder",
+            body: "You have an upcoming appointment scheduled. Please arrive 10 minutes early and bring any required documents.",
+            malicious: false
+        },
+        {
+            sender: "notifications@linkedin.com",
+            subject: "You appeared in 8 searches this week",
+            body: "Your profile was viewed by recruiters this week. Sign in to LinkedIn to see more details.",
+            malicious: false
+        },
+        {
+            sender: "team@university.ac.uk",
+            subject: "Timetable update available",
+            body: "Your lecture timetable has been updated. Please check the student portal for the latest version.",
+            malicious: false
+        },
+        {
+            sender: "orders@amazon.co.uk",
+            subject: "Your order has been dispatched",
+            body: "Your recent order is on its way. You can track your delivery through your Amazon account.",
+            malicious: false
+        },
+        {
+            sender: "it-helpdesk@company.co.uk",
+            subject: "Planned system maintenance",
+            body: "Scheduled maintenance will take place this weekend. Some services may be temporarily unavailable.",
+            malicious: false
+        },
+
+        // Malicious Email Examples
+        {
+            sender: "support@paypal-verification.com",
+            subject: "Unusual activity on your account",
+            body: "We noticed a sign-in attempt from a new device. Please review your account activity here to confirm everything is correct.",
+            malicious: true
+        },
+        {
+            sender: "admin@microsoft-support.net",
+            subject: "Security notification",
+            body: "Your account security settings were recently changed. If this wasn’t you, please review your account immediately.",
+            malicious: true
+        },
+        {
+            sender: "delivery@royalmail-tracking.net",
+            subject: "Delivery attempt update",
+            body: "We attempted delivery today but were unable to complete it. You can reschedule or confirm your details here.",
+            malicious: true
+        },
+        {
+            sender: "john.smith.photos@gmail.com",
+            subject: "Photos from the weekend",
+            body: "Hey, I found those photos from the weekend — thought you might want them. I uploaded them here:",
+            malicious: true
+        },
+        {
+            sender: "security@bank-alerts.co",
+            subject: "Account activity notice",
+            body: "We detected a login from a new location. Please review this activity to ensure your account is secure.",
+            malicious: true
+        },
+        {
+            sender: "support@apple-idverify.com",
+            subject: "Action required for your Apple ID",
+            body: "We need you to confirm your account information to avoid any disruption to your services.",
+            malicious: true
+        },
+        {
+            sender: "alerts@netflix-billing.co",
+            subject: "Issue with your latest payment",
+            body: "We were unable to process your recent payment. Please update your billing details to continue using the service.",
+            malicious: true
+        },
+        {
+            sender: "it-support@university-helpdesk.com",
+            subject: "Mailbox storage notice",
+            body: "Your mailbox is nearing its storage limit. You can review your storage usage and avoid disruption here.",
+            malicious: true
+        },
+        {
+            sender: "security@paypal-alerts.com",
+            subject: "Please confirm recent activity",
+            body: "We noticed a recent transaction that requires verification. Please review it at your earliest convenience.",
+            malicious: true
+        },
+        {
+            sender: "admin@amazon-account.co.uk",
+            subject: "Important: account information",
+            body: "We need you to confirm your account details to ensure there are no interruptions to your orders.",
+            malicious: true
+        }
+    ];
+
+    let trialIndex = 0;
+    let results = [];
+
+    let participantData = {
+        age: null,
+        experience: null
+    };
+
+    window.onload = function () {
+        const slider = document.getElementById("experience");
+        const output = document.getElementById("expValue");
+
+        function updateSlider() {
+            output.textContent = slider.value;
+        }
+
+        updateSlider();
+
+        slider.addEventListener("input", updateSlider);
+        slider.addEventListener("change", updateSlider);
+        slider.addEventListener("touchmove", updateSlider);
+    };
+
+   function startTest() {
+        const age = document.getElementById("age").value.trim();
+        const experience = document.getElementById("experience").value;
+
+        if (age === "" || isNaN(age)) {
+            alert("Please enter a valid age");
+            return;
+        }
+
+        participantData.age = age;
+        participantData.experience = experience;
+
+        document.getElementById("startScreen").style.display = "none";
+        document.getElementById("testScreen").style.display = "block";
+
+        shuffle(emailList);
+        showTrial();
+    }
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function showTrial() {
+        if (trialIndex >= emailList.length) {
+            document.getElementById("emailBox").innerHTML = "Experiment finished!";
+            document.getElementById("trialCounter").innerText = "";
+            return;
+        }
+
+        const email = emailList[trialIndex];
+
+        document.getElementById("sender").innerText = email.sender;
+        document.getElementById("subject").innerText = email.subject;
+        document.getElementById("body").innerText = email.body;
+
+        document.getElementById("trialCounter").innerText =
+            `Email ${trialIndex + 1} of ${emailList.length}`;
+
+        document.getElementById("feedback").innerText = "";
+    }
+
+    function respond(response) {
+        if (trialIndex >= emailList.length) return;
+
+        const email = emailList[trialIndex];
+        const correct = (response === email.malicious);
+
+        results.push({
+            trial: trialIndex + 1,
+            sender: email.sender,
+            subject: email.subject,
+            correctAnswer: email.malicious,
+            userResponse: response,
+            correct: correct
+        });
+
+        document.getElementById("feedback").innerText = correct ? "Correct" : "Incorrect";
+
+        trialIndex++;
+        setTimeout(showTrial, 800);
+    }
+
+    function downloadResults() {
+        const totalCorrect = results.filter(r => r.correct).length;
+        const totalTrials = results.length;
+
+        let text = `Participant Data:\n`;
+        text += `Age: ${participantData.age}\n`;
+        text += `Technical Experience: ${participantData.experience}\n\n`;
+        text += `Score: ${totalCorrect}/${totalTrials}\n\n`;
+
+        results.forEach(r => {
+            text += `Trial ${r.trial} | Correct: ${r.correct}\n`;
+        });
+
+        const blob = new Blob([text], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "results.txt";
+        a.click();
+
+        URL.revokeObjectURL(url);
+    }
+</script>
+
+</body>
+</html>
