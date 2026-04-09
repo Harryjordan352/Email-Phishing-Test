@@ -10,8 +10,9 @@
 
             display: flex;
             justify-content: center;
-            align-items: center;
-            height: 100vh;
+            align-items: flex-start; 
+            min-height: 100vh;      
+            padding: 20px;           
 
             margin: 0;
         }
@@ -42,19 +43,6 @@
             font-size: 16px;
         }
 
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            background-color: #f5f5f5;
-
-            display: flex;
-            justify-content: center;
-            align-items: flex-start; 
-            min-height: 100vh;      
-            padding: 20px;           
-
-            margin: 0;
-        }
-
         button {
             font-size: 16px; 
             padding: 10px 15px;
@@ -80,6 +68,7 @@
 
         <h1>Phishing Email Test</h1>
 
+        <!-- Start Screen (Input Details) --> 
         <div id="startScreen">
             <h2>Participant Information</h2>
 
@@ -93,6 +82,7 @@
             <button onclick="startTest()">Start Test</button>
         </div>
 
+        <!-- Test Screen (Email Questions) --> 
         <div id="testScreen" style="display:none;">
 
             <p id="trialCounter"></p>
@@ -108,6 +98,7 @@
 
             <p id="feedback"></p>
 
+            <!-- Buttons for collecting test results -->
             <div id="endButtons" style="display:none;">
                 <button onclick="downloadResults()">Download Results</button>
                 <button onclick="copyResults()">Copy Results</button>
@@ -118,138 +109,145 @@
     </div>
 
     <script>
-        const emailList = [
+        const emailList = [ // Email Examples
+            // Safe Emails
             {
                 sender: "delivery@royalmail.com",
                 subject: "Your parcel delivery window",
-                body: "Your parcel is due for delivery tomorrow between 9:00–12:00. You can track or reschedule via the Royal Mail website.",
+                body: "Your parcel is due for delivery tomorrow between 9:00–12:00. You can track or reschedule via the Royal Mail website. \n https://www.royalmail.com/track-your-item",
                 malicious: false
             },
             {
-                sender: "it-support@university.ac.uk",
-                subject: "Password updated successfully",
-                body: "This is a confirmation that your university account password was recently updated. If you did not make this change, please contact IT support.",
-                malicious: false
-            },
-            {
-                sender: "hr@company.co.uk",
-                subject: "Annual leave policy update",
-                body: "The updated annual leave policy for 2026 is now available on the staff portal. Please review it at your convenience.",
-                malicious: false
-            },
-            {
-                sender: "no-reply@bank.co.uk",
+                sender: "no-reply@natwest.co.uk",
                 subject: "Your monthly statement is ready",
-                body: "Your latest statement is now available. Please log in to your online banking account to view it securely.",
+                body: "Your latest statement is now available. Please log in to your online banking account to view it securely. \n https://www.natwest.co.uk/login",
                 malicious: false
             },
             {
                 sender: "support@spotify.com",
                 subject: "Subscription renewal confirmation",
-                body: "Your Spotify subscription has been successfully renewed. You can manage your plan in your account settings.",
+                body: "Your Spotify subscription has been successfully renewed. You can manage your plan in your account settings. \n https://www.spotify.com/account",
                 malicious: false
             },
             {
                 sender: "info@nhs.uk",
                 subject: "Appointment reminder",
-                body: "You have an upcoming appointment scheduled. Please arrive 10 minutes early and bring any required documents.",
-                malicious: false
-            },
-            {
-                sender: "notifications@linkedin.com",
-                subject: "You appeared in 8 searches this week",
-                body: "Your profile was viewed by recruiters this week. Sign in to LinkedIn to see more details.",
+                body: "You have an upcoming appointment scheduled. Please arrive 10 minutes early and bring any required documents. \n https://www.nhs.uk",
                 malicious: false
             },
             {
                 sender: "team@university.ac.uk",
                 subject: "Timetable update available",
-                body: "Your lecture timetable has been updated. Please check the student portal for the latest version.",
+                body: "Your lecture timetable has been updated. Please check the student portal for the latest version. \n https://portal.university.ac.uk",
+                malicious: false
+            },
+
+            // Harder Safe Emails
+            {
+                sender: "security@natwest.co.uk",
+                subject: "Unusual login attempt detected",
+                body: "We noticed a login attempt from a new device. If this was not you, please review your account activity via your usual banking app. \n https://www.natwest.co.uk/security",
                 malicious: false
             },
             {
-                sender: "orders@amazon.co.uk",
-                subject: "Your order has been dispatched",
-                body: "Your recent order is on its way. You can track your delivery through your Amazon account.",
+                sender: "accounts@amazon.co.uk",
+                subject: "Action may be required on your account",
+                body: "We noticed an issue with a recent order. Please review your account for further details using the official Amazon website. \n https://www.amazon.co.uk/your-account",
                 malicious: false
             },
             {
-                sender: "it-helpdesk@company.co.uk",
-                subject: "Planned system maintenance",
-                body: "Scheduled maintenance will take place this weekend. Some services may be temporarily unavailable.",
+                sender: "it-support@university.ac.uk",
+                subject: "Mailbox storage warning",
+                body: "Your mailbox is approaching its storage limit. Please review your storage usage through the university portal: \n https://mail.university.ac.uk",
                 malicious: false
             },
+            {
+                sender: "notifications@linkedin.com",
+                subject: "New sign-in from a different device",
+                body: "We noticed a sign-in to your account from a new device. If this was you, no further action is needed. \n https://www.linkedin.com/security",
+                malicious: false
+            },
+            {
+                sender: "hr@company.co.uk",
+                subject: "Updated internal document",
+                body: "An updated internal document has been shared with you. Please access it through the company portal: \n https://portal.company.co.uk",
+                malicious: false
+            },
+
+            // Malicious Emails
             {
                 sender: "support@paypal-verification.com",
-                subject: "Unusual activity on your account",
-                body: "We noticed a sign-in attempt from a new device. Please review your account activity here to confirm everything is correct.",
+                subject: "Unusual activity detected",
+                body: "We noticed a login attempt from a new device. Please confirm your details here: \n http://secure-paypal-check.com",
                 malicious: true
             },
             {
                 sender: "admin@microsoft-support.net",
-                subject: "Security notification",
-                body: "Your account security settings were recently changed. If this wasn’t you, please review your account immediately.",
+                subject: "Security alert",
+                body: "Your account settings were recently changed. If this wasn’t you, secure your account now: \n http://account-recovery-ms.net",
                 malicious: true
             },
             {
                 sender: "delivery@royalmail-tracking.net",
-                subject: "Delivery attempt update",
-                body: "We attempted delivery today but were unable to complete it. You can reschedule or confirm your details here.",
+                subject: "Delivery attempt failed",
+                body: "We were unable to deliver your parcel. Please reschedule here: \n http://royalmail-redelivery.net",
                 malicious: true
             },
             {
-                sender: "john.smith.photos@gmail.com",
+                sender: "john.smith7743@gmail.com",
                 subject: "Photos from the weekend",
-                body: "Hey, I found those photos from the weekend — thought you might want them. I uploaded them here:",
+                body: "Hey, I found those photos from the weekend — thought you’d want them: \n http://photo-share-now.com",
                 malicious: true
             },
             {
                 sender: "security@bank-alerts.co",
                 subject: "Account activity notice",
-                body: "We detected a login from a new location. Please review this activity to ensure your account is secure.",
+                body: "We detected a login from a new location. Please review your account activity here: \n http://bank-security-check.co",
                 malicious: true
             },
+
+            // Harder Malicious Emails
             {
                 sender: "support@apple-idverify.com",
                 subject: "Action required for your Apple ID",
-                body: "We need you to confirm your account information to avoid any disruption to your services.",
+                body: "We need you to confirm your account information to avoid service interruption. Please review your details here: \n http://apple-verify-user.com",
                 malicious: true
             },
             {
                 sender: "alerts@netflix-billing.co",
                 subject: "Issue with your latest payment",
-                body: "We were unable to process your recent payment. Please update your billing details to continue using the service.",
+                body: "We were unable to process your recent payment. Please update your billing details here: \n http://netflix-billing-update.co",
                 malicious: true
             },
             {
                 sender: "it-support@university-helpdesk.com",
                 subject: "Mailbox storage notice",
-                body: "Your mailbox is nearing its storage limit. You can review your storage usage and avoid disruption here.",
+                body: "Your mailbox is nearing its limit. To avoid disruption, review your storage here: \n http://university-mail-helpdesk.com",
                 malicious: true
             },
             {
                 sender: "security@paypal-alerts.com",
-                subject: "Please confirm recent activity",
-                body: "We noticed a recent transaction that requires verification. Please review it at your earliest convenience.",
+                subject: "Please review recent activity",
+                body: "We noticed a recent transaction that requires verification. Please review it here: \n http://paypal-activity-check.com",
                 malicious: true
             },
             {
                 sender: "admin@amazon-account.co.uk",
-                subject: "Important: account information",
-                body: "We need you to confirm your account details to ensure there are no interruptions to your orders.",
+                subject: "Important account information",
+                body: "We need you to confirm your account details to prevent interruptions to your orders. Review here: \n http://amazon-account-check.co.uk",
                 malicious: true
             }
         ];
 
-        let trialIndex = 0;
-        let results = [];
+        let trialIndex = 0; // Tracks current email
+        let results = []; // Stores user responses
 
-        let participantData = {
+        let participantData = { // Stores participant details
             age: null,
             experience: null
         };
 
-        window.onload = function () {
+        window.onload = function () { // Updates the displayed value when slider is moved
             const slider = document.getElementById("experience");
             const output = document.getElementById("expValue");
 
@@ -264,7 +262,7 @@
             slider.addEventListener("touchmove", updateSlider);
         };
 
-        function startTest() {
+        function startTest() { // Collects inputted details and moves to test screen
             const age = document.getElementById("age").value.trim();
             const experience = document.getElementById("experience").value;
 
@@ -283,14 +281,14 @@
             showTrial();
         }
 
-        function shuffle(array) {
+        function shuffle(array) { // Randomises order of emails
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [array[i], array[j]] = [array[j], array[i]];
             }
         }
 
-        function showTrial() {
+        function showTrial() { // Displays current email
         if (trialIndex >= emailList.length) {
             document.getElementById("emailBox").innerHTML = "Experiment finished!";
             document.getElementById("trialCounter").innerText = "";
@@ -311,7 +309,7 @@
             document.getElementById("feedback").innerText = "";
         }
 
-        function respond(response) {
+        function respond(response) { // Handles user response 
             if (trialIndex >= emailList.length) return;
 
             const email = emailList[trialIndex];
@@ -332,7 +330,7 @@
             setTimeout(showTrial, 800);
         }
 
-        function generateResultsText() {
+        function generateResultsText() { // Generates results in text form for copying
             const totalCorrect = results.filter(r => r.correct).length;
             const totalTrials = results.length;
 
@@ -348,7 +346,7 @@
             return text;
         }
 
-        function copyResults() {
+        function copyResults() { // Function for copying results
             const text = generateResultsText();
 
             navigator.clipboard.writeText(text).then(() => {
@@ -358,7 +356,7 @@
             });
         }
 
-        function downloadResults() {
+        function downloadResults() { // Function for downloading results
             const text = generateResultsText();
 
             const blob = new Blob([text], { type: "text/plain" });
