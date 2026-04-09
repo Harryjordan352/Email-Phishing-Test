@@ -93,8 +93,11 @@
                 <p id="body"></p>
             </div>
 
-            <button onclick="respond(false)">Safe</button>
-            <button onclick="respond(true)">Malicious</button>
+            <!-- Safe / Malicious buttons -->
+            <div id="responseButtons">
+                <button onclick="respond(false)">Safe</button>
+                <button onclick="respond(true)">Malicious</button>
+            </div>
 
             <p id="feedback"></p>
 
@@ -103,9 +106,7 @@
                 <button onclick="downloadResults()">Download Results</button>
                 <button onclick="copyResults()">Copy Results</button>
             </div>
-
         </div>
-
     </div>
 
     <script>
@@ -288,15 +289,17 @@
             }
         }
 
-        function showTrial() { // Displays current email
-        if (trialIndex >= emailList.length) {
-            document.getElementById("emailBox").innerHTML = "Experiment finished!";
-            document.getElementById("trialCounter").innerText = "";
+        function showTrial() { // Displays current email / Displays finish
+            if (trialIndex >= emailList.length) {
+                document.getElementById("emailBox").innerHTML = "Experiment finished!";
+                document.getElementById("trialCounter").innerText = "";
 
-            document.getElementById("endButtons").style.display = "block";
+                document.getElementById("responseButtons").style.display = "none";
+                document.getElementById("endButtons").style.display = "block";
 
-            return;
-        }
+                return;
+            }
+
             const email = emailList[trialIndex];
 
             document.getElementById("sender").innerText = email.sender;
