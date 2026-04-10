@@ -4,6 +4,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Phishing Email Test</title>
     <style>
+
         body {
             font-family: Arial, Helvetica, sans-serif;
             background-color: #f5f5f5;
@@ -31,6 +32,20 @@
             text-align: left;
             border-radius: 8px;
             box-sizing: border-box; 
+        }
+
+        button {
+            font-size: 16px;
+            padding: 12px 20px;
+            margin: 10px 8px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+
+            background-color: #BEFF99;
+            color: black;
+
+            transition: all 0.2s ease;
         }
 
         #trialCounter {
@@ -106,7 +121,9 @@
                 <button onclick="downloadResults()">Download Results</button>
                 <button onclick="copyResults()">Copy Results</button>
             </div>
+
         </div>
+
     </div>
 
     <script>
@@ -291,8 +308,10 @@
 
         function showTrial() { // Displays current email / Displays finish
             if (trialIndex >= emailList.length) {
-                document.getElementById("emailBox").innerHTML = "Experiment finished!";
+                document.getElementById("emailBox").innerHTML = "Test Complete! <br> Please copy or download your results.";
                 document.getElementById("trialCounter").innerText = "";
+
+                document.getElementById("feedback").style.display = "none";
 
                 document.getElementById("responseButtons").style.display = "none";
                 document.getElementById("endButtons").style.display = "block";
